@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class JobPost extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['employer_id', 'title', 'description', 'location', 'job_type'];
+    protected $fillable = ['title', 'description', 'location_id', 'type_id', 'category_id', 'employer_id', 'status'];
+    protected $hidden = ['category_id', 'type_id', 'location_id', 'employer_id'];
 
     public function employer()
     {
@@ -19,5 +21,9 @@ class JobPost extends Model
     {
         return $this->hasMany(Application::class, 'job_id');
     }
+
+    public function category() { return $this->belongsTo(JobCategory::class); }
+    public function type()     { return $this->belongsTo(JobType::class); }
+    public function location() { return $this->belongsTo(JobLocation::class); }
 }
 

@@ -18,6 +18,7 @@ class AuthController extends Controller
             'email'    => 'required|string|email|unique:users',
             'password' => 'required|string|min:6|confirmed',
             'role'     => 'required|in:employer,candidate',
+            'company_name' => 'nullable|string|required_if:role,employer',
         ]);
 
         $user = User::create([
@@ -25,6 +26,7 @@ class AuthController extends Controller
             'email'    => $request->email,
             'password' => bcrypt($request->password),
             'role'     => $request->role,
+            'company_name' => $request->company_name,
         ]);
 
         $token = JWTAuth::fromUser($user);

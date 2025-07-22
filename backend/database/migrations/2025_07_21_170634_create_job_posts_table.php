@@ -15,9 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('employer_id')->constrained('users')->onDelete('cascade');
             $table->string('title');
-            $table->text('description');
-            $table->string('location');
-            $table->string('job_type');
+            $table->longText('description');
+            $table->foreignId('category_id')->constrained('job_categories')->onDelete('restrict');
+            $table->foreignId('type_id')->constrained('job_types')->onDelete('restrict');
+            $table->foreignId('location_id')->constrained('job_locations')->onDelete('restrict');
             $table->timestamps();
         });
     }
