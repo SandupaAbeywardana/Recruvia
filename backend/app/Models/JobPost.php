@@ -9,8 +9,11 @@ class JobPost extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'description', 'location_id', 'type_id', 'category_id', 'employer_id', 'status'];
-    protected $hidden = ['category_id', 'type_id', 'location_id', 'employer_id'];
+    protected $fillable = ['title', 'description', 'location_id', 'type_id', 'category_id', 'employer_id', 'status', 'location_type_id'];
+    protected $hidden = ['category_id', 'type_id', 'location_id', 'employer_id', 'location_type_id'];
+    protected $casts = [
+        'status' => 'boolean',
+    ];
 
     public function employer()
     {
@@ -25,5 +28,6 @@ class JobPost extends Model
     public function category() { return $this->belongsTo(JobCategory::class); }
     public function type()     { return $this->belongsTo(JobType::class); }
     public function location() { return $this->belongsTo(JobLocation::class); }
+    public function locationType() { return $this->belongsTo(JobLocationType::class); }
 }
 

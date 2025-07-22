@@ -11,7 +11,7 @@ class JobPostController extends Controller
 {
     public function index()
     {
-        $jobs = JobPost::with(['employer', 'category', 'type', 'location'])->latest()->get();
+        $jobs = JobPost::with(['employer', 'category', 'type', 'location', 'locationType'])->latest()->get();
         return ResponseHelper::success($jobs, 'All job posts');
     }
 
@@ -22,7 +22,7 @@ class JobPostController extends Controller
             return ResponseHelper::error('Unauthorized', [], 403);
         }
 
-        $jobs = $user->jobPosts()->with(['category', 'type', 'location'])->latest()->get();
+        $jobs = $user->jobPosts()->with(['category', 'type', 'location', 'locationType'])->latest()->get();
         return ResponseHelper::success($jobs, 'Your job posts');
     }
 
@@ -39,7 +39,8 @@ class JobPostController extends Controller
             'location_id' => 'required|exists:job_locations,id',
             'type_id' => 'required|exists:job_types,id',
             'category_id' => 'required|exists:job_categories,id',
-            'status' => 'nullable|in:open,closed'
+            'location_type_id' => 'nullable|exists:job_location_types,id',
+            'status' => 'boolean'
         ]);
 
         $job = JobPost::create([
@@ -49,10 +50,11 @@ class JobPostController extends Controller
             'location_id' => $request->location_id,
             'type_id' => $request->type_id,
             'category_id' => $request->category_id,
-            'status' => $request->status ?? 'closed',
+            'location_type_id' => $request->location_type_id,
+            'status' => $request->status ?? false,
         ]);
 
-        return ResponseHelper::success($job->load(['category', 'type', 'location']), 'Job post created', 201);
+        return ResponseHelper::success($job->load(['category', 'type', 'location', 'locationType']), 'Job post created', 201);
     }
 
     public function update(Request $request, $id)
@@ -70,12 +72,15 @@ class JobPostController extends Controller
             'location_id' => 'sometimes|exists:job_locations,id',
             'type_id' => 'sometimes|exists:job_types,id',
             'category_id' => 'sometimes|exists:job_categories,id',
-            'status' => 'sometimes|in:open,closed'
+            'location_type_id' => 'sometimes|exists:job_location_types,id'
         ]);
 
-        $job->update($request->only(['title', 'description', 'location_id', 'type_id', 'category_id']));
+        $job->update($request->only([
+            'title', 'description',
+            'location_id', 'type_id', 'category_id', 'location_type_id'
+        ]));
 
-        return ResponseHelper::success($job->load(['category', 'type', 'location']), 'Job post updated');
+        return ResponseHelper::success($job->load(['category', 'type', 'location', 'locationType']), 'Job post updated');
     }
 
     public function destroy($id)
@@ -93,7 +98,7 @@ class JobPostController extends Controller
 
     public function search(Request $request)
     {
-        $query = JobPost::with(['employer', 'category', 'type', 'location']);
+        $query = JobPost::with(['employer', 'category', 'type', 'location', 'locationType']);
 
         if ($request->filled('keyword')) {
             $query->where(function ($q) use ($request) {
@@ -114,7 +119,11 @@ class JobPostController extends Controller
             $query->where('category_id', $request->category_id);
         }
 
-        $query->where('status', 'open');
+        if ($request->filled('location_type_id')) {
+            $query->where('location_type_id', $request->location_type_id);
+        }
+
+        $query->where('status', true);
 
         $jobs = $query->latest()->get();
 
@@ -123,12 +132,30 @@ class JobPostController extends Controller
 
     public function show($id)
     {
-        $job = JobPost::with(['employer', 'category', 'type', 'location'])->find($id);
+        $job = JobPost::with(['employer', 'category', 'type', 'location', 'locationType'])->find($id);
 
         if (!$job) {
             return ResponseHelper::error('Job not found', [], 404);
         }
 
         return ResponseHelper::success($job, 'Job post retrieved');
+    }
+
+    public function updateStatus($id, $status)
+    {
+        $user = Auth::user();
+        $job = JobPost::findOrFail($id);
+
+        if ($job->employer_id !== $user->id) {
+            return ResponseHelper::error('Unauthorized to update this job', [], 403);
+        }
+
+        if (!in_array($status, ['0', '1', 0, 1], true)) {
+            return ResponseHelper::error('Invalid status value. Must be 0 or 1.', [], 422);
+        }
+
+        $job->update(['status' => (bool) $status]);
+
+        return ResponseHelper::success($job, 'Job status updated');
     }
 }

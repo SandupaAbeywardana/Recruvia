@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use App\Models\JobCategory;
 use App\Models\JobType;
 use App\Models\JobLocation;
+use App\Models\JobLocationType;
 
 class JobMetaSeeder extends Seeder
 {
@@ -38,6 +39,28 @@ class JobMetaSeeder extends Seeder
             ['name' => 'Freelance'],
             ['name' => 'Temporary'],
             ['name' => 'Volunteer'],
+        ]);
+
+        JobLocation::insert([
+            ['name' => 'Colombo, Sri Lanka'],
+            ['name' => 'New York, USA'],
+            ['name' => 'London, UK'],
+            ['name' => 'Toronto, Canada'],
+            ['name' => 'Berlin, Germany'],
+            ['name' => 'Tokyo, Japan'],
+            ['name' => 'Melbourne, Australia'],
+            ['name' => 'Singapore'],
+            ['name' => 'Dubai, UAE'],
+            ['name' => 'Mumbai, India'],
+            ['name' => 'Cape Town, South Africa'],
+            ['name' => 'São Paulo, Brazil'],
+            ['name' => 'Buenos Aires, Argentina'],
+        ]);
+
+        JobLocationType::insert([
+            ['name' => 'Remote'],
+            ['name' => 'On-site'],
+            ['name' => 'Hybrid'],
         ]);
     }
 }

@@ -15,12 +15,14 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // User::factory()->create([
+        //     'name' => 'Admin',
+        //     'email' => 'admin@recruvia.com',
+        //     'password' => bcrypt('password'),
+        //     'role' => 'employer',
+        //     'company_name' => 'Recruvia Inc.',
+        // ]);
 
         $this->call(JobMetaSeeder::class);
-
     }
 }

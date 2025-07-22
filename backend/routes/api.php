@@ -19,6 +19,7 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/jobs/{id}', [JobPostController::class, 'destroy']);
     Route::get('/jobs/search', [JobPostController::class, 'search']);
     Route::get('/jobs/{id}', [JobPostController::class, 'show']);
+    Route::put('/jobs/{id}/status/{status}', [JobPostController::class, 'updateStatus']);
 
     Route::get('/job-categories', [JobMetaController::class, 'categories']);
     Route::post('/job-categories', [JobMetaController::class, 'storeCategory']);
@@ -29,4 +30,5 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/job-locations/{id}', [JobMetaController::class, 'deleteLocation']);
 
     Route::get('/job-types', [JobMetaController::class, 'types']);
+    Route::get('/job-location-types', [JobMetaController::class, 'locationTypes']);
 });

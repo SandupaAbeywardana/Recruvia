@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\JobCategory;
 use App\Models\JobType;
 use App\Models\JobLocation;
+use App\Models\JobLocationType;
 use App\Helpers\ResponseHelper;
 
 class JobMetaController extends Controller
@@ -60,5 +61,10 @@ class JobMetaController extends Controller
     public function types()
     {
         return ResponseHelper::success(JobType::all(), 'All job types');
+    }
+
+    public function locationTypes()
+    {
+        return ResponseHelper::success(JobLocationType::all(), 'All job location types');
     }
 }

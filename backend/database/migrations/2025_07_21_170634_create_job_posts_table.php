@@ -19,6 +19,8 @@ return new class extends Migration
             $table->foreignId('category_id')->constrained('job_categories')->onDelete('restrict');
             $table->foreignId('type_id')->constrained('job_types')->onDelete('restrict');
             $table->foreignId('location_id')->constrained('job_locations')->onDelete('restrict');
+            $table->foreignId('location_type_id')->constrained('job_location_types')->onDelete('restrict');
+            $table->boolean('status')->default(false);
             $table->timestamps();
         });
     }
