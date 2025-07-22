@@ -89,4 +89,35 @@ class JobApplicationController extends Controller
             return ResponseHelper::error('Application failed', [$e->getMessage()], 500);
         }
     }
+
+    public function listByJob($id)
+    {
+        $user = Auth::user();
+
+        if ($user->role !== 'employer') {
+            return ResponseHelper::error('Only employers can view job applications', [], 403);
+        }
+
+        $job = JobPost::where('employer_id', $user->id)
+            ->with(['applications.answers.field', 'applications.candidate'])
+            ->findOrFail($id);
+
+        return ResponseHelper::success($job->applications, 'Applications for this job');
+    }
+
+    public function myApplications()
+    {
+        $user = Auth::user();
+
+        if ($user->role !== 'candidate') {
+            return ResponseHelper::error('Only candidates can view their applications', [], 403);
+        }
+
+        $applications = $user->applications()
+            ->with(['jobPost.category', 'jobPost.type', 'jobPost.location'])
+            ->latest()
+            ->get();
+
+        return ResponseHelper::success($applications, 'Your job applications');
+    }
 }

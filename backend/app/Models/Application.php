@@ -33,4 +33,10 @@ class Application extends Model
     {
         return $this->hasMany(ApplicationFieldAnswer::class);
     }
+
+    public function jobPost()
+    {
+        return $this->belongsTo(JobPost::class, 'job_id');
+    }
+
 }

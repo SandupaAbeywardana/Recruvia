@@ -40,4 +40,6 @@ Route::middleware('auth:api')->group(function () {
 
     // Job Application routes
     Route::post('/jobs/{jobPostId}/apply', [JobApplicationController::class, 'apply']);
+    Route::get('/jobs/{id}/applications', [JobApplicationController::class, 'listByJob']);
+    Route::get('/applications/my', [JobApplicationController::class, 'myApplications']);
 });
