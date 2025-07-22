@@ -29,5 +29,10 @@ class JobPost extends Model
     public function type()     { return $this->belongsTo(JobType::class); }
     public function location() { return $this->belongsTo(JobLocation::class); }
     public function locationType() { return $this->belongsTo(JobLocationType::class); }
-}
 
+    public function applicationFields()
+    {
+        return $this->hasMany(JobApplicationField::class);
+    }
+
+}

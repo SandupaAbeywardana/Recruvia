@@ -15,7 +15,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('candidate_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('job_id')->constrained('job_posts')->onDelete('cascade');
-            $table->text('cover_letter')->nullable();
+            $table->string('first_name');
+            $table->string('last_name');
+            $table->string('email');
+            $table->string('phone');
+            $table->string('resume_path');
             $table->timestamps();
         });
     }

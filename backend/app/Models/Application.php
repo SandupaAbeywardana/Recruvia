@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Application extends Model
 {
@@ -19,5 +20,11 @@ class Application extends Model
     {
         return $this->belongsTo(JobPost::class, 'job_id');
     }
+
+    public function answers()
+    {
+        return $this->hasMany(ApplicationFieldAnswer::class);
+    }
+
 }
 

@@ -40,7 +40,29 @@ class JobPostController extends Controller
             'type_id' => 'required|exists:job_types,id',
             'category_id' => 'required|exists:job_categories,id',
             'location_type_id' => 'nullable|exists:job_location_types,id',
-            'status' => 'boolean'
+            'status' => 'boolean',
+            'fields' => 'nullable|array',
+            'fields.*.field_name' => 'required_with:fields|string|max:255',
+            'fields.*.field_description' => 'nullable|string',
+            'fields.*.field_type' => 'required_with:fields|in:text,textarea,number,date,file,select',
+            'fields.*.is_required' => 'boolean',
+            'fields.*.status' => 'boolean',
+            'fields.*.order' => 'nullable|integer',
+            'fields.*.options' => [
+                'nullable',
+                function ($attribute, $value, $fail) use ($request) {
+                    $index = explode('.', $attribute)[1] ?? null;
+                    $type = $request->input("fields.$index.field_type");
+
+                    if ($type === 'select') {
+                        if (!is_array($value) || empty($value)) {
+                            $fail('Options must be a non-empty array when field_type is select.');
+                        }
+                    } elseif ($value !== null) {
+                        $fail('Options are only allowed when field_type is select.');
+                    }
+                }
+            ],
         ]);
 
         $job = JobPost::create([
@@ -54,7 +76,21 @@ class JobPostController extends Controller
             'status' => $request->status ?? false,
         ]);
 
-        return ResponseHelper::success($job->load(['category', 'type', 'location', 'locationType']), 'Job post created', 201);
+        if ($request->has('fields')) {
+            foreach ($request->fields as $field) {
+                $job->applicationFields()->create([
+                    'field_name' => $field['field_name'],
+                    'field_description' => $field['field_description'] ?? null,
+                    'field_type' => $field['field_type'],
+                    'is_required' => $field['is_required'] ?? false,
+                    'status' => $field['status'] ?? true,
+                    'order' => $field['order'] ?? 0,
+                    'options' => in_array($field['field_type'], ['select']) ? ($field['options'] ?? []) : null,
+                ]);
+            }
+        }
+
+        return ResponseHelper::success($job->load(['category', 'type', 'location', 'locationType', 'applicationFields']), 'Job post created', 201);
     }
 
     public function update(Request $request, $id)
@@ -72,7 +108,30 @@ class JobPostController extends Controller
             'location_id' => 'sometimes|exists:job_locations,id',
             'type_id' => 'sometimes|exists:job_types,id',
             'category_id' => 'sometimes|exists:job_categories,id',
-            'location_type_id' => 'sometimes|exists:job_location_types,id'
+            'location_type_id' => 'sometimes|exists:job_location_types,id',
+            'fields' => 'nullable|array',
+            'fields.*.id' => 'sometimes|exists:job_application_fields,id',
+            'fields.*.field_name' => 'required_with:fields|string|max:255',
+            'fields.*.field_description' => 'nullable|string',
+            'fields.*.field_type' => 'required_with:fields|in:text,textarea,number,date,file,select',
+            'fields.*.is_required' => 'boolean',
+            'fields.*.status' => 'boolean',
+            'fields.*.order' => 'nullable|integer',
+            'fields.*.options' => [
+                'nullable',
+                function ($attribute, $value, $fail) use ($request) {
+                    $index = explode('.', $attribute)[1] ?? null;
+                    $type = $request->input("fields.$index.field_type");
+
+                    if ($type === 'select') {
+                        if (!is_array($value) || empty($value)) {
+                            $fail('Options must be a non-empty array when field_type is select.');
+                        }
+                    } elseif ($value !== null) {
+                        $fail('Options are only allowed when field_type is select.');
+                    }
+                }
+            ],
         ]);
 
         $job->update($request->only([
@@ -80,7 +139,43 @@ class JobPostController extends Controller
             'location_id', 'type_id', 'category_id', 'location_type_id'
         ]));
 
-        return ResponseHelper::success($job->load(['category', 'type', 'location', 'locationType']), 'Job post updated');
+        if ($request->has('fields')) {
+            $existingFieldIds = $job->applicationFields()->pluck('id')->toArray();
+            $updatedFieldIds = [];
+
+            foreach ($request->fields as $field) {
+                if (isset($field['id'])) {
+                    $job->applicationFields()
+                        ->where('id', $field['id'])
+                        ->update([
+                            'field_name' => $field['field_name'],
+                            'field_description' => $field['field_description'] ?? null,
+                            'field_type' => $field['field_type'],
+                            'is_required' => $field['is_required'] ?? false,
+                            'status' => $field['status'] ?? true,
+                            'order' => $field['order'] ?? 0,
+                            'options' => in_array($field['field_type'], ['select']) ? json_encode($field['options'] ?? []) : null,
+                        ]);
+                    $updatedFieldIds[] = $field['id'];
+                } else {
+                    $job->applicationFields()->create([
+                        'field_name' => $field['field_name'],
+                        'field_description' => $field['field_description'] ?? null,
+                        'field_type' => $field['field_type'],
+                        'is_required' => $field['is_required'] ?? false,
+                        'status' => $field['status'] ?? true,
+                        'order' => $field['order'] ?? 0,
+                        'options' => in_array($field['field_type'], ['select']) ? json_encode($field['options'] ?? []) : null,
+                    ]);
+                }
+            }
+
+            $fieldsToDelete = array_diff($existingFieldIds, $updatedFieldIds);
+            $job->applicationFields()->whereIn('id', $fieldsToDelete)->delete();
+        }
+
+
+        return ResponseHelper::success($job->load(['category', 'type', 'location', 'locationType', 'applicationFields']), 'Job post updated');
     }
 
     public function destroy($id)
