@@ -206,9 +206,11 @@ class JobPostController extends Controller
             ->where('status', true);
 
         if ($request->filled('keyword')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('title', 'like', '%' . $request->keyword . '%')
-                  ->orWhere('description', 'like', '%' . $request->keyword . '%');
+            $keyword = strtolower($request->keyword);
+
+            $query->where(function ($q) use ($keyword) {
+                $q->where(DB::raw('LOWER(title)'), 'like', '%' . $keyword . '%')
+                    ->orWhere(DB::raw('LOWER(description)'), 'like', '%' . $keyword . '%');
             });
         }
 
