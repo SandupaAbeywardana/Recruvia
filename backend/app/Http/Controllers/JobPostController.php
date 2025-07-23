@@ -162,7 +162,7 @@ class JobPostController extends Controller
                             'is_required' => $field['is_required'] ?? false,
                             'status' => $field['status'] ?? true,
                             'order' => $field['order'] ?? 0,
-                            'options' => $field['field_type'] === 'select' ? json_encode($field['options']) : null,
+                            'options' => $field['field_type'] === 'select' ? $field['options'] : null,
                         ]);
                         $updatedIds[] = $field['id'];
                     } else {
@@ -173,7 +173,7 @@ class JobPostController extends Controller
                             'is_required' => $field['is_required'] ?? false,
                             'status' => $field['status'] ?? true,
                             'order' => $field['order'] ?? 0,
-                            'options' => $field['field_type'] === 'select' ? json_encode($field['options']) : null,
+                            'options' => $field['field_type'] === 'select' ? $field['options'] : null,
                         ]);
                     }
                 }
