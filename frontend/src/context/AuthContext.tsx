@@ -20,12 +20,14 @@ type AuthContextType = {
   user: User | null;
   loading: boolean;
   logout: () => void;
+  refreshUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   logout: () => {},
+  refreshUser: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -34,26 +36,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const refreshUser = async () => {
+    setLoading(true);
+    const token = Cookies.get("token");
+    if (!token) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await authAPIs.getCurrentUser();
+      setUser(res.data.data);
+    } catch {
+      Cookies.remove("token");
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchUser = async () => {
-      const token = Cookies.get("token");
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const res = await authAPIs.getCurrentUser();
-        setUser(res.data.data);
-      } catch {
-        Cookies.remove("token");
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    void fetchUser(); // silence "void-return expected" warning
+    void refreshUser();
   }, []);
 
   const logout = () => {
@@ -64,7 +68,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const contextValue = useMemo(
-    () => ({ user, loading, logout }),
+    () => ({ user, loading, logout, refreshUser }),
     [user, loading]
   );
 

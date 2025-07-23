@@ -10,13 +10,14 @@ import {
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
-import CustomHead from "@/utils/customHead";
+import CustomHead from "@/utils/CustomHead";
 
 import authAPIs from "@/api/authAPIs";
 import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { toast } from "react-toastify";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -24,6 +25,8 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [viewPassword, setViewPassword] = useState(false);
   const router = useRouter();
+
+  const { user, refreshUser } = useAuth();
 
   useEffect(() => {
     const token = Cookies.get("token");
@@ -41,13 +44,21 @@ export default function LoginPage() {
       const res = await authAPIs.login({ email, password });
 
       Cookies.set("token", res.data.data.token);
-      router.push("/");
+      await refreshUser();
       toast.update(toastId, {
         render: "Login successful",
         type: "success",
         isLoading: false,
         autoClose: 2000,
       });
+      setTimeout(() => {
+        const redirectPath = router.query.redirect as string;
+        if (redirectPath) {
+          router.push(redirectPath);
+        } else {
+          router.push(`/`);
+        }
+      }, 2000);
     } catch (err: unknown) {
       if (axios.isAxiosError(err) && err.response?.data?.message) {
         setError(err.response.data.message);
@@ -56,6 +67,10 @@ export default function LoginPage() {
       }
     }
   };
+
+  if (user) {
+    return null;
+  }
 
   return (
     <>

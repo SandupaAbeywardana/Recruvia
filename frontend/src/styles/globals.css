@@ -1,42 +1,28 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-html,
 body {
-  max-width: 100vw;
-  overflow-x: hidden;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+.swal2-container {
+  z-index: 9999 !important;
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+#swal-target-container {
+  position: absolute;
+  height: 310px;
+  width: 100%;
+  z-index: 999999;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+.swal2-popup {
+  font-size: 0.75rem !important;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+div:where(.swal2-container) input:where(.swal2-input):focus {
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.Toastify__toast-body {
+  font-size: 0.8rem !important;
 }

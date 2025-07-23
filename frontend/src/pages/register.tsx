@@ -13,7 +13,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
 import authAPIs from "@/api/authAPIs";
-import CustomHead from "@/utils/customHead";
+import CustomHead from "@/utils/CustomHead";
 import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "@iconify/react/dist/iconify.js";

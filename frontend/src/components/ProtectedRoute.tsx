@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { CircularProgress, Box } from "@mui/material";
 import { useEffect, ReactNode } from "react";
 
-const publicRoutes = ["/login", "/register"];
+const publicRoutes = ["/", "/login", "/register"];
 
 const routeRoleMap: { [prefix: string]: "employer" | "candidate" } = {
   "/employer": "employer",
@@ -27,7 +27,7 @@ export default function ProtectedRoute({
 
     if (!loading) {
       if (!user && !isPublic) {
-        router.replace("/login");
+        router.replace("/login?redirect=" + encodeURIComponent(path));
       } else if (user && path === "/") {
         router.replace(`/${user.role}/dashboard`);
       } else if (user && requiredRole && user.role !== requiredRole) {

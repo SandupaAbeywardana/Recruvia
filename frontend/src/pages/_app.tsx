@@ -6,6 +6,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 import "react-toastify/dist/ReactToastify.css";
+import "../styles/globals.css";
 
 const theme = createTheme();
 

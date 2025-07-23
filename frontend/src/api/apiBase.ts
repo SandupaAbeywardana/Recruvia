@@ -28,7 +28,9 @@ apiPrivate.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     if (error.response?.status === 401) {
-      toast.error("Session expired. Please login again.");
+      toast.error("Session expired. Please login again.", {
+        toastId: "session-expired",
+      });
       Cookies.remove("token");
       Router.push("/login");
     }
