@@ -16,6 +16,7 @@ import {
   IconButton,
   MenuItem,
   Stack,
+  Switch,
   Table,
   TableBody,
   TableCell,
@@ -56,6 +57,8 @@ export default function EditJobPostPage() {
   const [locations, setLocations] = useState<any[]>([]);
   const [locationTypes, setLocationTypes] = useState<any[]>([]);
 
+  const [jobPost, setJobPost] = useState<any>(null);
+
   useEffect(() => {
     if (id) {
       const fetchJobPost = async () => {
@@ -63,6 +66,7 @@ export default function EditJobPostPage() {
           setLoading(true);
           const response = await apiPrivate.get(`/jobs/${id}`);
           const jobData = response.data.data;
+          setJobPost(jobData);
           setTitle(jobData.title);
           setDescription(jobData.description);
           setCategoryId(jobData.category);
@@ -79,7 +83,7 @@ export default function EditJobPostPage() {
 
       fetchJobPost();
     }
-  }, [id]);
+  }, [id, refresh]);
 
   const filter = createFilterOptions<any>();
 
@@ -327,9 +331,80 @@ export default function EditJobPostPage() {
               <Typography variant="h5" fontWeight={600}>
                 Edit Job Post
               </Typography>
-              <Button variant="contained" onClick={handleSubmit}>
-                Update Job
-              </Button>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 1,
+                    }}
+                  >
+                    <Typography variant="body1">Status:</Typography>
+                    <Typography
+                      variant="body1"
+                      color={jobPost?.status ? "success" : "error"}
+                    >
+                      {jobPost?.status ? "Active" : "Inactive"}
+                    </Typography>
+                  </Box>
+                  <Switch
+                    checked={jobPost?.status}
+                    onChange={async (e) => {
+                      const toastId = toast.loading(
+                        `Updating job post status to ${
+                          e.target.checked ? "Active" : "Inactive"
+                        }...`,
+                        {
+                          autoClose: false,
+                        }
+                      );
+                      try {
+                        const response = await apiPrivate.put(
+                          `/jobs/${id}/status/${e.target.checked ? "1" : "0"}`
+                        );
+
+                        toast.update(toastId, {
+                          render: `Job post status updated to ${
+                            e.target.checked ? "Active" : "Inactive"
+                          }`,
+                          type: "success",
+                          autoClose: 3000,
+                          isLoading: false,
+                        });
+
+                        if (response.status === 200) {
+                          setRefresh(!refresh);
+                        }
+                      } catch (error) {
+                        console.error("Error updating job post status:", error);
+                        toast.update(toastId, {
+                          render: "Failed to update job post status",
+                          type: "error",
+                          autoClose: 3000,
+                          isLoading: false,
+                        });
+                      }
+                    }}
+                  />
+                </Box>
+                <Button variant="contained" onClick={handleSubmit}>
+                  Update Job
+                </Button>
+              </Box>
             </Box>
 
             <Grid container spacing={2} sx={{ my: 3 }}>

@@ -10,6 +10,7 @@ import {
   Divider,
   MenuItem,
   Stack,
+  Switch,
   Table,
   TableBody,
   TableCell,
@@ -22,6 +23,7 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 export default function ViewJobPost() {
   const router = useRouter();
@@ -32,6 +34,7 @@ export default function ViewJobPost() {
   const [loading, setLoading] = useState(true);
 
   const [fields, setFields] = useState([]);
+  const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -50,7 +53,7 @@ export default function ViewJobPost() {
 
       fetchJobPost();
     }
-  }, [id]);
+  }, [id, refresh]);
 
   return (
     <>
@@ -120,12 +123,83 @@ export default function ViewJobPost() {
               <Typography variant="h5" fontWeight={600}>
                 View Job Post
               </Typography>
-              <Button
-                variant="contained"
-                onClick={() => router.push(`/employer/job-posts/${id}/edit`)}
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                }}
               >
-                Edit Job Post
-              </Button>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 1,
+                    }}
+                  >
+                    <Typography variant="body1">Status:</Typography>
+                    <Typography
+                      variant="body1"
+                      color={jobPost.status ? "success" : "error"}
+                    >
+                      {jobPost.status ? "Active" : "Inactive"}
+                    </Typography>
+                  </Box>
+                  <Switch
+                    checked={jobPost.status}
+                    onChange={async (e) => {
+                      const toastId = toast.loading(
+                        `Updating job post status to ${
+                          e.target.checked ? "Active" : "Inactive"
+                        }...`,
+                        {
+                          autoClose: false,
+                        }
+                      );
+                      try {
+                        const response = await apiPrivate.put(
+                          `/jobs/${id}/status/${e.target.checked ? "1" : "0"}`
+                        );
+
+                        toast.update(toastId, {
+                          render: `Job post status updated to ${
+                            e.target.checked ? "Active" : "Inactive"
+                          }`,
+                          type: "success",
+                          autoClose: 3000,
+                          isLoading: false,
+                        });
+
+                        if (response.status === 200) {
+                          setRefresh(!refresh);
+                        }
+                      } catch (error) {
+                        console.error("Error updating job post status:", error);
+                        toast.update(toastId, {
+                          render: "Failed to update job post status",
+                          type: "error",
+                          autoClose: 3000,
+                          isLoading: false,
+                        });
+                      }
+                    }}
+                  />
+                </Box>
+                <Button
+                  variant="contained"
+                  onClick={() => router.push(`/employer/job-posts/${id}/edit`)}
+                >
+                  Edit Job Post
+                </Button>
+              </Box>
             </Box>
 
             <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
