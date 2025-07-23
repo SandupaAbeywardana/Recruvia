@@ -1,43 +1,41 @@
+import { apiPrivate } from "@/api/apiBase";
+import { useAuth } from "@/context/AuthContext";
+import CustomHead from "@/utils/CustomHead";
+import { Icon } from "@iconify/react/dist/iconify.js";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
+  Autocomplete,
   Box,
   Button,
+  Checkbox,
   Container,
-  TextField,
-  Typography,
-  Grid,
-  MenuItem,
-  IconButton,
-  Paper,
-  Divider,
-  Stack,
-  Autocomplete,
   createFilterOptions,
+  Divider,
+  Grid,
+  IconButton,
+  MenuItem,
+  Stack,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Checkbox,
+  TextField,
+  Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
-import { apiPrivate } from "@/api/apiBase";
-import { useRouter } from "next/router";
-import { toast } from "react-toastify";
-import DeleteIcon from "@mui/icons-material/Delete";
-import CustomHead from "@/utils/CustomHead";
-import { useAuth } from "@/context/AuthContext";
-import Image from "next/image";
-import React from "react";
 import dynamic from "next/dynamic";
-import { Icon } from "@iconify/react/dist/iconify.js";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 
 const ReactJordit = dynamic(() => import("jodit-react"), { ssr: false });
 
 export default function CreateJobPostPage() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   const [refresh, setRefresh] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -84,7 +82,7 @@ export default function CreateJobPostPage() {
         field_type: "text",
         is_required: false,
         order: prev.length + 1,
-        description: "",
+        field_description: "",
         options: [],
       },
     ]);
@@ -168,7 +166,7 @@ export default function CreateJobPostPage() {
         field_type: field.field_type,
         is_required: field.is_required,
         status: true,
-        description: field.description || "",
+        field_description: field.field_description || "",
         order: field.order,
         ...(field.field_type === "select" && { options: field.options }),
       })),
@@ -235,7 +233,7 @@ export default function CreateJobPostPage() {
 
   return (
     <>
-      <CustomHead title="Employer Dashboard" />
+      <CustomHead title="Create New Job Post" />
       <Container maxWidth="lg">
         <Box
           mt={4}
@@ -612,6 +610,9 @@ export default function CreateJobPostPage() {
                       <TableCell
                         sx={{
                           py: 2,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 2,
                         }}
                       >
                         <TextField
@@ -628,9 +629,9 @@ export default function CreateJobPostPage() {
                           size="small"
                           fullWidth
                           label="Description"
-                          value={field.description || ""}
+                          value={field.field_description || ""}
                           onChange={(e) =>
-                            updateField(i, "description", e.target.value)
+                            updateField(i, "field_description", e.target.value)
                           }
                           sx={{ mt: 1 }}
                         />

@@ -233,7 +233,7 @@ class JobPostController extends Controller
 
     public function show($id)
     {
-        $job = JobPost::with(['employer', 'category', 'type', 'location', 'locationType'])->find($id);
+        $job = JobPost::with(['employer', 'category', 'type', 'location', 'locationType', 'applicationFields'])->find($id);
 
         if (!$job) {
             return ResponseHelper::error('Job not found', [], 404);
